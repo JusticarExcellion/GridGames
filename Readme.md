@@ -1,6 +1,6 @@
 # Grid Games ( Title WIP )
-## by Zachary "Xander" Bruce
-## ie. Justicar Excellion
+by Zachary "Xander" Bruce
+ie. Justicar Excellion
 
 ### Description:
 
@@ -30,4 +30,9 @@ The core loop of the game will be to survive all levels by using your boosts, po
     - As a jumping off point for enemy pathfinding and AI
 
 - Cinemachine package for camera management
+
+
+## Project Progress
+
+## August 29th, 2024
 
