@@ -34,5 +34,6 @@ The core loop of the game will be to survive all levels by using your boosts, po
 
 ## Project Progress
 
-## August 29th, 2024
+### August 29th, 2024
+![Unity_YDRPfUDg5Z](https://github.com/user-attachments/assets/866470c1-daba-433f-ad8b-8bf6f78c3cba)
 
