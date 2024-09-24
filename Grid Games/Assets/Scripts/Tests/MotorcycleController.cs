@@ -3,6 +3,7 @@ using UnityEngine.Assertions;
 
 public class MotorcycleController : MonoBehaviour
 {
+    //TODO: PUT MODELS ON A DIFFERENT PHYSICS LAYER, than colliders and see how that works with the current leaning implementation
     public VehicleInput VInput;
 
     public float MotorTorque;
@@ -34,11 +35,11 @@ public class MotorcycleController : MonoBehaviour
     void
     Start()
     {
-        MotorTorque = 138f;
-        BrakeTorque = 138f;
-        SteeringRange = 60f;
+        MotorTorque = 1000f;
+        BrakeTorque = 300f;
+        SteeringRange = 80f;
         MaxSpeed = 100.0f;
-        SteeringRangeAtMaxSpeed = 10f;
+        SteeringRangeAtMaxSpeed = 20f;
         CentreOfGravityOffset = -1f;
 
         CasterAngle = 24.2f;

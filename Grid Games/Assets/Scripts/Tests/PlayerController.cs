@@ -40,6 +40,8 @@ public class PlayerController : MonoBehaviour
 
         gameInput = new GameInputStates();
 
+        //TODO: We need to know if the gamepad is connected then get the keyboard input if it isn't
+
         //NOTE: Gamepad buttons
         gameInput.buttonStates.north.buttonPressed = Gamepad.current.buttonNorth.wasPressedThisFrame;
         gameInput.buttonStates.south.buttonPressed = Gamepad.current.buttonSouth.wasPressedThisFrame;

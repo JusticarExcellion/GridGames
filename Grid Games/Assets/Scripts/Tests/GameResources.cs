@@ -1,12 +1,12 @@
+using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public struct Button
 {
     public bool buttonPressed;
 }
 
-public struct GameInputStates
+public class GameInputStates
 {
     public struct ButtonStates
     {
@@ -27,6 +27,7 @@ public struct GameInputStates
     public float rightTrigger;
 }
 
+[Serializable]
 public struct VehicleInput
 {
     public float acceleration;
