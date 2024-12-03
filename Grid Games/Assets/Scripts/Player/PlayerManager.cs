@@ -5,9 +5,11 @@ public class PlayerManager : MonoBehaviour
 {
     //TODO: This will manage the player's current state and be responsible for reacting to player input and taking the appropriate action depending on the context
     public static PlayerManager instance;
-    public bool Playing = false; //NOTE: Used for when we are switching the state of the game, i.e. menu, pausing, loading, etc.
+    public CycleBehavior Player; //NOTE: When the player is spawned it subscribes itself to be the main player instance this sholud be set to null at the end of the level
+    public bool PlayerDestroyed {get; private set;}
 
-    void Start() //NOTE: Singleton
+    void
+    Awake() //NOTE: Singleton
     {
         if( instance == null )
         {
@@ -18,14 +20,28 @@ public class PlayerManager : MonoBehaviour
             Destroy( this );
         }
         DontDestroyOnLoad( this );
-        Playing = true;
     }
 
-    void Update()
+    private void
+    Update()
     {
-        if( Playing )
+        if( !Player && !PlayerDestroyed)
         {
+            Player = FindObjectOfType<CycleBehavior>();
         }
+    }
+
+    public CycleBehavior
+    GetPlayer()
+    {
+        if( PlayerDestroyed ) return null;
+        else return Player;
+    }
+
+    public void
+    DestroyedPlayer()
+    {
+        PlayerDestroyed = true;
     }
 
 }

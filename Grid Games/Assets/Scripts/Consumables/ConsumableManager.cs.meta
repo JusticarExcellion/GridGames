@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 1bed92817871e3943854e227dac7c3e2
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - ConsumableSpawnPoints: {instanceID: 0}
+  - MissileProjectile: {fileID: 3601723904169336903, guid: 42b10d4a36c6b7f4a8ddb23710098d99, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

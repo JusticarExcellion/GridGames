@@ -6,6 +6,8 @@ public class LightTrailCollisions : MonoBehaviour
     //TODO: Need to create the process for detecting if someone has hit a light trail
     //This will be very perfomance critical since we have more than one object going to be running this
 
+    //TODO: This is causing damage and hits to objects that are not actually getting hit by the light trail, we need to figure why and how to stop it, or cheat it
+
     //NOTE: Need to think about the maximum amount of AI Enemies in a level to still be performant without any significant frame drops
 
     /* NOTE: This seems to be a decent solution for this needs a lot of testing:
@@ -14,7 +16,8 @@ public class LightTrailCollisions : MonoBehaviour
 
     public TrailRenderer trailRenderer;
     private Transform MyTransform;
-    [SerializeField] private LayerMask CyclesLayer;
+    [SerializeField] private bool AIControlled;
+    [SerializeField] private LayerMask DamagingLayer;
 
     private void Start()
     {
@@ -43,9 +46,20 @@ public class LightTrailCollisions : MonoBehaviour
 
             RaycastHit hit;
 
-            if ( Physics.SphereCast( startPosition, width, direction, out hit, distance, CyclesLayer ) )
+            if ( Physics.SphereCast( startPosition, width, direction, out hit, distance, DamagingLayer ) )
             {
-                Debug.Log( "Cycle is Hitting" );
+                Debug.Log(hit.collider.gameObject.name + ": Hit!");
+                //NOTE: Damage Enemy
+                if( AIControlled )
+                {
+                    CycleBehavior player = hit.collider.gameObject.GetComponent<CycleBehavior>();
+                    player.DamageHealth();
+                }
+                else
+                {
+                    SeekerAI enemy = hit.collider.gameObject.GetComponent<SeekerAI>();;
+                    if( enemy )enemy.DamageHealth();
+                }
             }
         }
     }
