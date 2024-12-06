@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class MissileScript : MonoBehaviour
@@ -37,7 +39,7 @@ public class MissileScript : MonoBehaviour
     private bool
     SeekNewTarget() //NOTE: We call seek new target when the previous target was destroyed
     {
-        SeekerAI[] EnemiesInScene = AIManager.Instance.GetSeekersInScene();
+        List<SeekerAI> EnemiesInScene = AIManager.Instance.GetSeekersInScene();
         float shortestDistance = 10000;
 
         foreach( SeekerAI Enemy in EnemiesInScene )

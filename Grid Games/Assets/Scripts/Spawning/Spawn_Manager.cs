@@ -2,45 +2,97 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Spawn_Manager : MonoBehaviour
+public class SpawnManager : MonoBehaviour
 {
 
-    [HideInInspector] public List<Spawner> Spawners;
-    [SerializeField] private int NumberOfEnemies;
-    private int CurrentNumberOfEnemies;
+    [HideInInspector] public Spawner[] Spawners;
+
     [Header("Player Prefab")]
     [SerializeField] private GameObject Player;
+
     [Header("Enemy Prefab")]
-    [SerializeField] private GameObject Enemy;
-    private int SpawnNumber; //NOTE: Spawn Number starts at 1, though it is initialized to 0 at first usage it's value will be 1
+    [SerializeField] private GameObject Seeker;
+    [SerializeField] private GameObject Interceptor;
+
+    private int CurrentNumberOfSeekers;
+    private int CurrentNumberOfInterceptors;
+
+    private List<int> SeekerWaveNumbers;
+    private List<int> InterceptorWaveNumbers;
+    private int WaveNum;
 
     void Start()
     {
-        SpawnNumber = 0;
-        CurrentNumberOfEnemies = 0;
+        WaveNum = 0;
+    }
+
+    public bool
+    Initialize( in List<int> SeekersWave, in List<int> InterceptorWave)
+    {
+        CurrentNumberOfSeekers = 0;
+        CurrentNumberOfInterceptors = 0;
+        SeekerWaveNumbers = SeekersWave;
+        InterceptorWaveNumbers = InterceptorWave;
+        Spawners = FindObjectsOfType<Spawner>();
+        if( Spawners.Length == 0 ) return false;
+        return true;
+    }
+
+    public bool
+    SpawnPlayer()
+    {
+        bool playerSpawned = false;
         foreach( Spawner currentSpawner in Spawners )
         {
             if( currentSpawner.ForcePlayerSpawn )
             {
-                SpawnPlayer( currentSpawner.transform.position, currentSpawner.StartingDirection );
+                SpawnPlayerInstance( currentSpawner.transform.position, currentSpawner.StartingDirection );
+                playerSpawned = true;
+                break;
+            }
+        }
+
+        if( !playerSpawned )
+        {
+            Debug.Log("No Player Spawn Located!");
+            return false;
+        }
+
+        return true;
+    }
+
+    public bool
+    SpawnAllEntities()
+    {
+        //TODO: Pick a random spawner instead of doing this for each
+        //TODO: Spawn wave of enemies
+        foreach( Spawner currentSpawner in Spawners )
+        {
+            if( currentSpawner.ForcePlayerSpawn ) continue;
+
+            if( CurrentNumberOfSeekers < SeekerWaveNumbers[WaveNum] )
+            {
+                SpawnEnemy( currentSpawner.transform.position, currentSpawner.StartingDirection, in Seeker );
+                CurrentNumberOfSeekers++;
+            }
+            else if( CurrentNumberOfInterceptors < InterceptorWaveNumbers[WaveNum] )
+            {
+                SpawnEnemy( currentSpawner.transform.position, currentSpawner.StartingDirection, in Interceptor );
+                CurrentNumberOfInterceptors++;
             }
             else
             {
-                if( CurrentNumberOfEnemies < NumberOfEnemies )
-                {
-                    SpawnEnemy( currentSpawner.transform.position, currentSpawner.StartingDirection );
-                    CurrentNumberOfEnemies++;
-                }
-                else
-                {
-                    break;
-                }
+                break;
             }
         }
+
+        WaveNum++;
+
+        return true;
     }
 
     private void
-    SpawnPlayer( Vector3 Location, Directions StartingDirection )
+    SpawnPlayerInstance( Vector3 Location, Directions StartingDirection )
     {
 
         GameObject PlayerInstance = Instantiate( Player );
@@ -66,10 +118,10 @@ public class Spawn_Manager : MonoBehaviour
     }
 
     private void
-    SpawnEnemy( Vector3 Location, Directions StartingDirection )
+    SpawnEnemy( Vector3 Location, Directions StartingDirection, in GameObject EnemyPrefab )
     {
 
-        GameObject EnemyInstance = Instantiate( Enemy );
+        GameObject EnemyInstance = Instantiate( EnemyPrefab );
         Transform EnemyTransform = EnemyInstance.transform;
         EnemyTransform.position = Location;
 
@@ -89,12 +141,4 @@ public class Spawn_Manager : MonoBehaviour
         }
 
     }
-
-    public int
-    GetSpawnNumber()
-    {
-        SpawnNumber+=1;
-        return SpawnNumber;
-    }
-
 }

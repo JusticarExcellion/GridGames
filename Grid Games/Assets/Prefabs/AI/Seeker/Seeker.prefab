@@ -117,7 +117,8 @@ GameObject:
   m_Component:
   - component: {fileID: 8043378359036709550}
   - component: {fileID: 471272654393097685}
-  m_Layer: 0
+  - component: {fileID: 704471707063902647}
+  m_Layer: 6
   m_Name: Seeker
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -155,23 +156,44 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MaxSpeed: 45
   AttackSpeed: 55
-  Health: 1
+  Health: 2
   SlowRadius: 7
   TargetRadius: 5
   TimeToTarget: 0.1
   AttackLookAhead: 10
-  AggressionDistance: 20
+  AggressionDistance: 100
   Offset: {x: 10, y: 0}
   AttackTime: 2
   TimeToAttack: 0
   Attacking: 0
   CurrentState: 0
-  InvincibilityTimer: 2
+  InvincibilityTimer: 3
   TestTarget: {fileID: 0}
   LightTrail: {fileID: 4254929780563571338}
   SeekerModel: {fileID: 274194793195197533}
   DebugInfo: 1
   VelocityRayLength: 1
+--- !u!65 &704471707063902647
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1582363775383172144}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6305977129392710336
 GameObject:
   m_ObjectHideFlags: 0
@@ -322,7 +344,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   trailRenderer: {fileID: 4254929780563571338}
-  AIControlled: 0
+  AIControlled: 1
   DamagingLayer:
     serializedVersion: 2
     m_Bits: 128

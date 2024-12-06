@@ -5,9 +5,12 @@ using UnityEngine;
 public class MenuControls : MonoBehaviour
 {
     [Header("Player Input:")]
-    [SerializeField] private InputHandler PlayerInput;
-    [SerializeField] private MainMenuManager MainMananger;
+    private InputHandler PlayerInput;
+    [SerializeField] private MenuManager MainMananger;
     [SerializeField] private List<BetterUI> MenuButtons;
+
+    [Header("Menu Control")]
+    [SerializeField] private MenuInfo ParentMenu;
 
     private int MenuCount;
     private bool ElementActive;
@@ -37,6 +40,11 @@ public class MenuControls : MonoBehaviour
 
     void Update()
     {
+        if( !PlayerInput )
+        {
+            PlayerInput = FindObjectOfType< InputHandler >();
+            return;
+        }
         GameInputStates userInput = PlayerInput.GetInput();
         HandleMenuInput( in userInput );
         PreviousUserInput = userInput;
@@ -51,6 +59,11 @@ public class MenuControls : MonoBehaviour
     HandleMenuInput( in GameInputStates userInput )
     {
 
+        if( userInput.buttonStates.start.buttonPressed )
+        { // If Escape is pressed or start is pressed then we back out
+
+            Back();
+        }
 
         if( ElementActive )
         {
@@ -100,6 +113,13 @@ public class MenuControls : MonoBehaviour
         }
 
         MenuButtons[ CurrentSelectedOption ].SelectElement();
+
+    }
+
+    public void
+    ContinueGame()
+    {
+        LevelManager.Instance.Unpause();
     }
 
     public void
@@ -118,75 +138,82 @@ public class MenuControls : MonoBehaviour
     ExitGame()
     {
         Debug.Log("Exiting...");
-        Debug.Break();
+        Application.Quit();
+    }
+
+    public void
+    Back()
+    {
+        if( ParentMenu )
+        {
+            MainMananger.ChangeToMenu( ParentMenu.MenuIndex );
+        }
+        else // If no parent then we get the level Manager and unpause the game
+        {
+            LevelManager.Instance.Unpause();
+        }
+    }
+
+    public void
+    OpenMain()
+    {
+        MainMananger.ChangeToMenu( MenuManager.MainIndex );
     }
 
     public void
     OpenOptions()
     {
-        MainMananger.ChangeToMenu( 2 );
-        Debug.Log("Opening Options...");
-    }
-
-    public void
-    BackToMainMenu()
-    {
-        MainMananger.ChangeToMenu( 0 );
-        Debug.Log("Back To Main...");
-    }
-
-    public void
-    ContinueGame()
-    {
-        Debug.Log("Continue Game...");
-    }
-
-    public void
-    SelectLevel( int levelNumber )
-    {
-        Debug.LogFormat("Loading Level: {i}", levelNumber );
-    }
-
-    public void
-    OpenSelectLevel()
-    {
-        MainMananger.ChangeToMenu( 1 );
-        Debug.Log("Open Select Level");
-    }
-
-    public void
-    OpenAudio()
-    {
-        MainMananger.ChangeToMenu( 3 );
-        Debug.Log("Open Audio Options");
-    }
-
-    public void
-    OpenGraphics()
-    {
-        MainMananger.ChangeToMenu( 4 );
-        Debug.Log("Open Graphics Options");
-    }
-
-    public void
-    OpenGame()
-    {
-        MainMananger.ChangeToMenu( 5 );
-        Debug.Log("Open Game Options");
+        MainMananger.ChangeToMenu( MenuManager.OptionsIndex );
     }
 
     public void
     OpenInstructions()
     {
-        MainMananger.ChangeToMenu( 6 );
-        Debug.Log("Opening Instructions");
+        MainMananger.ChangeToMenu( MenuManager.InstructionsIndex );
     }
 
     public void
     OpenCredits()
     {
-        MainMananger.ChangeToMenu( 7 );
-        Debug.Log("Opening Credits");
+        MainMananger.ChangeToMenu( MenuManager.CreditsIndex );
+    }
+
+    public void
+    OpenAudio()
+    {
+        MainMananger.ChangeToMenu( MenuManager.AudioIndex );
+    }
+
+    public void
+    OpenGame()
+    {
+        MainMananger.ChangeToMenu( MenuManager.GameIndex );
+    }
+
+    public void
+    OpenLevelSelector()
+    {
+        MainMananger.ChangeToMenu( MenuManager.LevelSelectorIndex );
+    }
+
+    public void
+    OpenGraphics()
+    {
+        MainMananger.ChangeToMenu( MenuManager.GraphicIndex );
+    }
+
+    public void
+    BackToMainMenu()
+    {
+        //TODO: Get the level manager and tell it direct the scenemangare to load the first level
+
+    }
+
+    public void
+    RestartLevel()
+    {
+        //TODO: Tell level manager to restart the level
+        LevelManager.Instance.RestartLevel();
     }
 
 }

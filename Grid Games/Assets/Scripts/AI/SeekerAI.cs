@@ -277,7 +277,7 @@ public class SeekerAI : MonoBehaviour
         }
     }
 
-    private void
+    public void
     DestroySeeker()
     {
         Overlord.RemoveSeeker( in Self );

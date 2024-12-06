@@ -27,6 +27,7 @@ public class LightTrailCollisions : MonoBehaviour
     //NOTE: Test this and try to figure out a way to filter these results
     private void FixedUpdate()
     {
+        if( !trailRenderer.emitting ) return;
         //We need to filter these results to ignore the current model when checking for other models to deal damage to
         for( int i = 0; i < trailRenderer.positionCount; i++ )
         {
@@ -48,12 +49,11 @@ public class LightTrailCollisions : MonoBehaviour
 
             if ( Physics.SphereCast( startPosition, width, direction, out hit, distance, DamagingLayer ) )
             {
-                Debug.Log(hit.collider.gameObject.name + ": Hit!");
                 //NOTE: Damage Enemy
                 if( AIControlled )
                 {
-                    CycleBehavior player = hit.collider.gameObject.GetComponent<CycleBehavior>();
-                    player.DamageHealth();
+                    PlayerCollision playerCollider = hit.collider.gameObject.GetComponent<PlayerCollision>();
+                    playerCollider.player.DamageHealth();
                 }
                 else
                 {

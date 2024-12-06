@@ -78,7 +78,7 @@ public class CycleBehavior : MonoBehaviour
         CurrentState = EngineStates.Idle;
         PreviousState = EngineStates.None;
         CycleKinematic.Transform = MyTransform;
-        Spawn_Manager SM = FindObjectOfType<Spawn_Manager>();
+        SpawnManager SM = FindObjectOfType<SpawnManager>();
         health = 2;
         InvincibilityTimer = 0.0f;
         Boost = false;
@@ -239,6 +239,10 @@ public class CycleBehavior : MonoBehaviour
     {
         GameInputStates Controller = UserInput.GetInput(); // TODO: We need to get rid of this
 
+        if( Controller.buttonStates.start.buttonPressed )
+        { //Pause the game
+            LevelManager.Instance.Pause();
+        }
         if( Controller.buttonStates.north.buttonPressed )
         {
             HandleConsumableAction();
@@ -301,6 +305,7 @@ public class CycleBehavior : MonoBehaviour
         if( health < 1 )
         {
             DestroyCycle();
+            PlayerManager.instance.DestroyedPlayer();
         }
     }
 
@@ -352,10 +357,7 @@ public class CycleBehavior : MonoBehaviour
     {
         //TODO: This is where we activate and play graphical effects, sounds, and update intiate updates to global lists like the current number of Enemies in the scene
         Destroy( this.gameObject );
-        Debug.Break();
         print("Player Destroyed");
-
-        //TODO: We will need to deactivate the object and wait until the light trail has completely dissipated before we can destroy the object
     }
 
     private void

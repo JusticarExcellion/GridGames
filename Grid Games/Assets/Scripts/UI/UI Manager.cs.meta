@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 55c50a9cd6bca8d4f83e7e792712a785
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - IH: {instanceID: 0}
+  - PauseMenu: {instanceID: 0}
+  - FailScreen: {instanceID: 0}
+  - SuccessScreen: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

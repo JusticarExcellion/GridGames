@@ -58,7 +58,6 @@ public class AIResources
         return Result;
     }
 
-    //TODO: Chase Behavior
     public static Steering
     Chase( in Kinematic Target, in Kinematic Character )
     {
@@ -78,6 +77,7 @@ public class AIResources
         }
 
         //NOTE: Seek Behavior at the prediction target
+        //TODO: This only works correctly seemingly in the -z direction does not chase properly otherwise
         Vector3 NewSeekTarget = Target.Transform.position + (Target.Velocity * prediction);
 
         /* DEBUG:

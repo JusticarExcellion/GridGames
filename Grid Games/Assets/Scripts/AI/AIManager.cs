@@ -58,13 +58,19 @@ public class AIManager : MonoBehaviour
     {
         if( !Player )
         {
-            Player = PlayerManager.instance.GetPlayer();
-            if( Player == null )
+            if( PlayerManager.instance ) 
             {
-                //NOTE: Check to see if player is destroyed
-                PlayerDestroyed = PlayerManager.instance.PlayerDestroyed;
+                Player = PlayerManager.instance.GetPlayer();
+                if( Player == null )
+                {
+                    //NOTE: Check to see if player is destroyed
+                    PlayerDestroyed = PlayerManager.instance.PlayerDestroyed;
+                }
             }
         }
+
+        //TODO: If there are no more seekers and there are no more waves left to spawn then show the success screen
+
 
         //NOTE: We give orders to all of the AI based on their personal information
     }
@@ -137,10 +143,16 @@ public class AIManager : MonoBehaviour
 
     }
 
+    public List<SeekerAI>
+    GetSeekersInScene()
+    {
+        return Seekers;
+    }
+
     public bool
     AttackingDecision( in SeekerAI Questioner )
     {
-        if( !PlayerDestroyed ) return false; //NOTE: If player is destroyed do not attack
+        if( PlayerDestroyed ) return false; //NOTE: If player is destroyed do not attack
 
         for(int i = 0; i < AttackingSeekers.Length; i++ )
         {
@@ -175,7 +187,7 @@ public class AIManager : MonoBehaviour
     }
 
     public SeekerAI[]
-    GetSeekersInScene()
+    GetAttackingSeekers()
     {
         return AttackingSeekers;
     }
