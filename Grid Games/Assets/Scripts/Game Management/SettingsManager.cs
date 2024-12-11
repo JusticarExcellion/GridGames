@@ -9,13 +9,12 @@ public enum AudioChannelType
     SFX
 }
 
-/* NOTE: If we are using more than one type of dropdown pivot to using this
- *
- * public enum DropdownType
- * {
- *      Difficulty,
- * }
- */
+// NOTE: If we are using more than one type of dropdown pivot to using this
+  public enum DropdownType
+  {
+       Difficulty,
+       GraphicLevel
+  }
 
 public class SettingsManager : MonoBehaviour
 {
@@ -26,6 +25,7 @@ public class SettingsManager : MonoBehaviour
     public const string SFX = "SFXAudio";
 
     public const string Difficulty = "Difficulty";
+    public const string GraphicalLevel = "GraphicalLevel";
     //TODO: Other Options key names go here
 
     public bool
@@ -57,7 +57,20 @@ public class SettingsManager : MonoBehaviour
         return true;
     }
 
-    public bool
+    public void
+    SaveDropdown( int value, DropdownType type )
+    {
+        if( type == DropdownType.Difficulty )
+        {
+            SaveDifficulty( value );
+        }
+        else if( type == DropdownType.GraphicLevel )
+        {
+            SaveGraphicalLevel( value );
+        }
+    }
+
+    private bool
     SaveDifficulty( int value )
     {
         if( value < 0 )
@@ -86,6 +99,37 @@ public class SettingsManager : MonoBehaviour
             return 1;
         }
     }
+
+    private bool
+    SaveGraphicalLevel( int value )
+    {
+        if( value < 0 )
+        {
+            return false;
+        }
+        Debug.Log( "Saving Graphical Level: value = " + value );
+        PlayerPrefs.SetInt( GraphicalLevel, value );
+        PlayerPrefs.Save();
+        return true;
+    }
+
+    public int
+    GetGraphicalLevel()
+    {
+        if( PlayerPrefs.HasKey( GraphicalLevel ) )
+        {
+            int GraphicsValue = PlayerPrefs.GetInt( GraphicalLevel );
+            Debug.Log("Data Found: Difficulty = " + GraphicsValue );
+            return GraphicsValue;
+        }
+        else
+        { //TODO: We may need to change this default setting
+            Debug.Log("No Saved Data. Setting Defaults...");
+            PlayerPrefs.SetInt( GraphicalLevel , 1 );
+            return 1;
+        }
+    }
+
 
     public int
     GetAudio( AudioChannelType channel )

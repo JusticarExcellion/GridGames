@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6289158284783888399}
+  - component: {fileID: 514705312197216038}
   m_Layer: 5
   m_Name: FailScreen
   m_TagString: EndScreens
@@ -39,6 +40,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &514705312197216038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1307596899550001979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6739f0dbfb39b114799af635a02b6319, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ScreenText: {fileID: 1836436305159258584}
 --- !u!1 &1775714069489066881
 GameObject:
   m_ObjectHideFlags: 0
@@ -148,8 +162,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 250, y: -100}
-  m_SizeDelta: {x: 400, y: 50}
+  m_AnchoredPosition: {x: 395, y: -320}
+  m_SizeDelta: {x: 690, y: 600}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1050673115746626143
 CanvasRenderer:
@@ -179,7 +193,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Statistics:'
+  m_text: "Statistics\n\nEnemies Destroyed: \n\nTimes Boosted:\n\nActivated Light
+    Trail: times\n\nLight Trail Active for: Seconds\n\nConsumables Used:"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: bb4db1c501a57904c93f2ed04acb4867, type: 2}
   m_sharedMaterial: {fileID: 8369008710784901150, guid: bb4db1c501a57904c93f2ed04acb4867, type: 2}
@@ -206,8 +221,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 30
+  m_fontSizeBase: 30
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -491,6 +506,7 @@ MonoBehaviour:
   - {fileID: 393940520205370636}
   - {fileID: 2268935461434009987}
   ParentMenu: {fileID: 0}
+  HorizontalMovement: 1
 --- !u!1 &9218472068137118380
 GameObject:
   m_ObjectHideFlags: 0

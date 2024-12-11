@@ -14,6 +14,7 @@ public class BetterImageChanger : BetterUI
 
     private Image InstructionImage;
     private int CurrentInstruction;
+    private int ImageCount;
     private float CurrentTimer;
     private float ResetTimer;
 
@@ -31,6 +32,11 @@ public class BetterImageChanger : BetterUI
         InstructionImage = this.GetComponent<Image>();
         CurrentTimer = 0f;
         ResetTimer = .4f;
+        if( InstructionImages.Count != 0 )
+        {
+            Debug.Log("Image set to: " + CurrentInstruction );
+            InstructionImage.sprite = InstructionImages[ CurrentInstruction ];
+        }
     }
 
     private void
@@ -55,6 +61,11 @@ public class BetterImageChanger : BetterUI
     {
         //DEBUG:
         int PreviousInstruction = CurrentInstruction;
+
+        if( userInput.buttonStates.south.buttonPressed )
+        {
+            Press();
+        }
 
         if( userInput.dpad.y == -1f && ( userInput.dpad.y != PreviousInput.dpad.y ) ||  ( ( userInput.leftStick.y < -.8f && PreviousInput.leftStick.y > -.8f ) || ( userInput.leftStick.y > .8f && PreviousInput.leftStick.y < .8f) ) )
         {
@@ -85,11 +96,49 @@ public class BetterImageChanger : BetterUI
             CurrentTimer = ResetTimer;
         }
 
+        int ImageCount = InstructionImages.Count;
+        if( CurrentInstruction > ImageCount - 1)
+        {
+            CurrentInstruction = 0;
+        }
+
+        if( CurrentInstruction < 0)
+        {
+            CurrentInstruction = ImageCount - 1;
+        }
+
         if( PreviousInstruction != CurrentInstruction )
         {
             Debug.Log("Current Instruction: " + CurrentInstruction );
+            InstructionImage.sprite = InstructionImages[ CurrentInstruction ];
         }
 
         return true;
+    }
+
+    public void
+    NextInstruction()
+    {
+        CurrentInstruction++;
+        int ImageCount = InstructionImages.Count;
+        if( CurrentInstruction > ImageCount - 1)
+        {
+            CurrentInstruction = 0;
+        }
+        Debug.Log("Current Instruction: " + CurrentInstruction );
+        InstructionImage.sprite = InstructionImages[ CurrentInstruction ];
+    }
+
+    public void
+    PreviousInstruction()
+    {
+        CurrentInstruction--;
+        int ImageCount = InstructionImages.Count;
+        if( CurrentInstruction < 0)
+        {
+            CurrentInstruction = ImageCount - 1;
+        }
+        Debug.Log("Current Instruction: " + CurrentInstruction );
+        InstructionImage.sprite = InstructionImages[ CurrentInstruction ];
     }
 }

@@ -41,6 +41,7 @@ public class PlayerManager : MonoBehaviour
     public void
     DestroyedPlayer()
     {
+
         PlayerDestroyed = true;
         LevelManager.Instance.EndLevel( true );
     }
@@ -51,6 +52,12 @@ public class PlayerManager : MonoBehaviour
         Destroy( Player.Cycle_Rigidbody.gameObject );
         Destroy( Player.COG_Rigidbody.gameObject );
         Destroy( Player.gameObject );
+    }
+
+    public void
+    Restart()
+    {
+        PlayerDestroyed = false;
     }
 
 }

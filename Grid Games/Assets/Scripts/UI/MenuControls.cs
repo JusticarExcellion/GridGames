@@ -11,6 +11,7 @@ public class MenuControls : MonoBehaviour
 
     [Header("Menu Control")]
     [SerializeField] private MenuInfo ParentMenu;
+    [SerializeField] private bool HorizontalMovement;
 
     private int MenuCount;
     private bool ElementActive;
@@ -64,6 +65,10 @@ public class MenuControls : MonoBehaviour
 
             Back();
         }
+        if( userInput.buttonStates.east.buttonPressed )
+        {
+            Back();
+        }
 
         if( ElementActive )
         {
@@ -74,30 +79,52 @@ public class MenuControls : MonoBehaviour
         //TODO: this is if a controller is already connected, then we handle which menu item is selected and performing the on click functions associated with the menu item
         if( CurrentTimer <= 0 )
         {
+            if(!HorizontalMovement)
+            {
+                if( userInput.dpad.y == -1f )
+                {
+                    CurrentSelectedOption++;
+                }
+                else if( userInput.dpad.y == 1f )
+                {
+                    CurrentSelectedOption--;
+                }
 
-            if( userInput.dpad.y == -1f )
-            {
-                CurrentSelectedOption++;
+                if( userInput.leftStick.y < -.8f )
+                {
+                    CurrentSelectedOption++;
+                }
+                else if( userInput.leftStick.y > .8f )
+                {
+                    CurrentSelectedOption--;
+                }
             }
-            else if( userInput.dpad.y == 1f )
+            else // Using Horizontal Input instead of vertical
             {
-                CurrentSelectedOption--;
-            }
+                if( userInput.dpad.x == -1f )
+                {
+                    CurrentSelectedOption++;
+                }
+                else if( userInput.dpad.x == 1f )
+                {
+                    CurrentSelectedOption--;
+                }
 
-            if( userInput.leftStick.y < -.8f )
-            {
-                CurrentSelectedOption++;
-            }
-            else if( userInput.leftStick.y > .8f )
-            {
-                CurrentSelectedOption--;
+                if( userInput.leftStick.x < -.8f )
+                {
+                    CurrentSelectedOption++;
+                }
+                else if( userInput.leftStick.x > .8f )
+                {
+                    CurrentSelectedOption--;
+                }
             }
 
             CurrentTimer = ResetTimer;
         }
 
 
-        if( CurrentSelectedOption >= MenuCount )
+        if( CurrentSelectedOption > MenuCount - 1)
         {
             CurrentSelectedOption = 0;
         }
@@ -150,7 +177,10 @@ public class MenuControls : MonoBehaviour
         }
         else // If no parent then we get the level Manager and unpause the game
         {
-            LevelManager.Instance.Unpause();
+            if( LevelManager.Instance )
+            {
+                if( !LevelManager.Instance.GameOver ) LevelManager.Instance.Unpause();
+            }
         }
     }
 
@@ -205,14 +235,12 @@ public class MenuControls : MonoBehaviour
     public void
     BackToMainMenu()
     {
-        //TODO: Get the level manager and tell it direct the scenemangare to load the first level
-
+        LevelManager.Instance.Quit();
     }
 
     public void
     RestartLevel()
     {
-        //TODO: Tell level manager to restart the level
         LevelManager.Instance.RestartLevel();
     }
 

@@ -3,15 +3,13 @@ using UnityEngine;
 
 public class CycleBehavior : MonoBehaviour
 {
-    //TODO: We need to check if the motorcycle is player controlled
-    //then we will get our input from the player, otherwise it will need an AI will need to created to move the cycle
-
-    //TODO: We need to add sound cues based off the state of this, layering audio
-
-    private InputHandler UserInput; // TODO: We want to get rid of this and not have the Cycle know about the user unless plans change
+    private InputHandler UserInput;
 
     [Header("Character Parameters")]
+    private int[] PlayerHealthLevels = { 4, 3 , 2 };
+    private int MaxHealth;
     [SerializeField] private int health;
+
     [SerializeField] private Transform ProjectileSpawn;
     private static readonly int InvincibilityTime = 2;
     private float InvincibilityTimer;
@@ -26,6 +24,7 @@ public class CycleBehavior : MonoBehaviour
     private float CurrentBoostTimer = 0;
     private bool CanBoost = true;
     private bool Boost = false;
+    private bool Paused = false;
 
     [Header("Motorcycle Paramters")]
     [SerializeField] private float MaxSpeed = 45;
@@ -53,14 +52,20 @@ public class CycleBehavior : MonoBehaviour
     public Rigidbody COG_Rigidbody, Cycle_Rigidbody;
 
     private Transform MyTransform;
-    public TrailRenderer LightTrail;
+    public LightTrailCollisions LightTrail;
     public PlayerManager PM;
 
     public AudioSource EngineAudio;
+    public AudioSource SpecialAudio;
     public AudioClip CurrentAudioClip;
 
     private EngineStates CurrentState;
     private EngineStates PreviousState;
+
+    //NOTE: Cycle Statistics
+    private int TimesBoosted;
+    private int LightTrailActivated;
+    private int ConsumablesUsed;
 
     void Start()
     {
@@ -69,7 +74,7 @@ public class CycleBehavior : MonoBehaviour
         CycleKinematic = new Kinematic();
 
 
-        UserInput = this.GetComponent<InputHandler>();
+        UserInput = FindObjectOfType<InputHandler>();
         MyTransform = this.transform;
         RayLength = COG_Rigidbody.GetComponent<SphereCollider>().radius + 0.75f;
         CurrentSpeed = MaxSpeed;
@@ -83,10 +88,24 @@ public class CycleBehavior : MonoBehaviour
         InvincibilityTimer = 0.0f;
         Boost = false;
         CurrentConsumable = ConsumableType.None;
+
+        if( !SpecialAudio )
+        SpecialAudio = this.gameObject.AddComponent< AudioSource >();
+        SpecialAudio.loop = false;
+        SpecialAudio.spatialBlend = 1.0f;
+
+        //NOTE: Statistics setup
+        TimesBoosted = 0;
+        LightTrailActivated = 0;
+        ConsumablesUsed = 0;
+        int DifficultyLevel = LevelManager.Instance.DifficultyLevel;
+        MaxHealth = PlayerHealthLevels[ DifficultyLevel ];
+        health = MaxHealth;
     }
 
     void Update()
     {
+        if( Paused ) return;
         float deltaTime = Time.deltaTime;
         HandleUserActions();
 
@@ -113,8 +132,10 @@ public class CycleBehavior : MonoBehaviour
         }
         else if( CurrentBoostRechargeTimer < 0 && !CanBoost )
         {
+            //TODO: This is somewhat bugged and gets hit mulitple times before it actually should be recharged
             CanBoost = true;
             CurrentBoostRechargeTimer = 0;
+            AudioManager.Instance.PlaySpecialEffect( in SpecialAudio, SpecialEffect.BoostRecharge );
             //Debug.Log("Boost Recharge");
         }
 
@@ -128,6 +149,7 @@ public class CycleBehavior : MonoBehaviour
 
     void FixedUpdate()
     {
+        if( Paused ) return;
         MyTransform.position = COG_Rigidbody.transform.position;
         Movement();
     }
@@ -167,13 +189,16 @@ public class CycleBehavior : MonoBehaviour
     void
     Acceleration(in VehicleInput VI)
     {
-        if( VI.acceleration > 0 )
+        if( !Boost )
         {
-            CurrentState = EngineStates.Medium;
-        }
-        else
-        {
-            CurrentState = EngineStates.Idle;
+            if( VI.acceleration > 0 )
+            {
+                CurrentState = EngineStates.Medium;
+            }
+            else
+            {
+                CurrentState = EngineStates.Idle;
+            }
         }
 
         //TODO: We need to adjust this based on whether or not the light trail is active
@@ -256,37 +281,44 @@ public class CycleBehavior : MonoBehaviour
                 CurrentSpeed = BoostSpeed;
                 Boost = true;
                 CanBoost = false;
+                //TODO: Switch Engine State to boost
+                CurrentState = EngineStates.Boost;
+                TimesBoosted++;
             }
         }
-        if( Controller.buttonStates.west.buttonPressed ){
-
+        if( Controller.buttonStates.west.buttonPressed )
+        {
 
             if( !Boost )
             {
-                if( LightTrail.emitting ) //NOTE: Slowing down the cycle when the trail is active
+                if( LightTrail.Emitting ) //NOTE: Slowing down the cycle when the trail is active
                 {
-                    LightTrail.emitting = false;
+                    LightTrail.StopEmitting();
                     CurrentSpeed = MaxSpeed;
                 }
                 else
                 {
-                    LightTrail.emitting = true;
+                    LightTrail.StartEmitting();
                     CurrentSpeed = .75f * MaxSpeed;
+                    LightTrailActivated++;
                 }
             }
             else
             {
-                if( LightTrail.emitting ) //NOTE: Slowing down the cycle when the trail is active
+                if( LightTrail.Emitting ) //NOTE: Slowing down the cycle when the trail is active
                 {
-                    LightTrail.emitting = false;
+                    LightTrail.StopEmitting();
                     CurrentSpeed = BoostSpeed;
                 }
                 else
                 {
-                    LightTrail.emitting = true;
+                    LightTrail.StartEmitting();
                     CurrentSpeed = .75f * BoostSpeed;
+                    LightTrailActivated++;
                 }
             }
+
+            AudioManager.Instance.PlaySpecialEffect( in SpecialAudio, SpecialEffect.TrailUp );
 
         }
     }
@@ -298,7 +330,7 @@ public class CycleBehavior : MonoBehaviour
         if( InvincibilityTimer <= 0 )
         {
             health--;
-            print("Damaged Health");
+            AudioManager.Instance.PlaySpecialEffect( in SpecialAudio, SpecialEffect.Damaged );
             InvincibilityTimer = InvincibilityTime;
         }
 
@@ -313,38 +345,36 @@ public class CycleBehavior : MonoBehaviour
     Heal()
     {
         health++;
+        if( health > MaxHealth )
+        {
+            health = MaxHealth;
+        }
+
+        Debug.Log( "Healed! Current Health = " + health );
     }
 
     private void
     FireMissile()
     {
-        ConsumableManager cm = FindObjectOfType<ConsumableManager>();
-        GameObject go = Instantiate( cm.MissileProjectile );
-        go.transform.position = ProjectileSpawn.position;
-
     }
 
     public void
     HandleConsumableAction()
     {
         string text = "Using Consumable: ";
+        ConsumablesUsed++;
         switch( CurrentConsumable )
         {
             //TODO: Complete Implementation of the Consumables
             case ConsumableType.Heal:
                 text += "Heal";
                 Heal();
-                break;
-            case ConsumableType.Missile:
-                text += "Missile";
-                FireMissile();
-                break;
-            case ConsumableType.Test:
-                text += "Test";
+                UIManager.Instance.HideConsumable();
                 break;
             //Make an Invincibility Consumable
             default:
                 text = "No Consumable";
+                ConsumablesUsed--;
                 break;
         }
 
@@ -352,10 +382,16 @@ public class CycleBehavior : MonoBehaviour
         CurrentConsumable = ConsumableType.None;
     }
 
+    public void
+    PickUp( ConsumableType type )
+    {
+        CurrentConsumable = type;
+        UIManager.Instance.ShowConsumable();
+    }
+
     private void
     DestroyCycle()
     {
-        //TODO: This is where we activate and play graphical effects, sounds, and update intiate updates to global lists like the current number of Enemies in the scene
         Destroy( this.gameObject );
         print("Player Destroyed");
     }
@@ -363,6 +399,33 @@ public class CycleBehavior : MonoBehaviour
     private void
     OnDestroy()
     {
+    }
+
+    public void
+    Pause()
+    {
+        Paused = true;
+        COG_Rigidbody.velocity = Vector3.zero;
+        EngineAudio.Stop();
+        LightTrail.Pause();
+    }
+
+    public void
+    Unpause()
+    {
+        Paused = false;
+        EngineAudio.Play();
+        LightTrail.UnPause();
+    }
+
+    public void
+    FillStatistics( out GameStatistics gameStats )
+    {
+        gameStats = new GameStatistics();
+        gameStats.TimesBoosted = TimesBoosted;
+        gameStats.LightTrailActivated = LightTrailActivated;
+        gameStats.ConsumablesUsed = ConsumablesUsed;
+        gameStats.ActiveTrailTime = LightTrail.GetTrailActiveTime();
     }
 
 }

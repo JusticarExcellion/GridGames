@@ -10,13 +10,19 @@ public struct WaypointTracker
 
 public class AIManager : MonoBehaviour
 {
-    //TODO: We will need to redo all of this at some point
+    private int[] SeekerHealth = { 1, 1, 2 };
+    private int[] InterceptorHealth = { 2, 3, 4 };
     [SerializeField] private Transform WaypointParent;
     private List<Transform> Waypoints;
     private List<SeekerAI> Seekers;
     private SeekerAI[] AttackingSeekers;
     private CycleBehavior Player;
     private bool PlayerDestroyed;
+    private bool Paused;
+    public int EnemiesDestroyed;
+    public int EnemiesDestroyedThisWave;
+    public int EnemiesThisWave;
+    int DifficultyLevel;
 
     [Header("AI Testing")]
     public TestingObject TestTarget;
@@ -38,10 +44,14 @@ public class AIManager : MonoBehaviour
         DontDestroyOnLoad( this );
         AttackingSeekers = new SeekerAI[2];
         Seekers = new List<SeekerAI>();
+        EnemiesDestroyed = 0;
+        Paused = false;
     }
 
     void Start()
     {
+        DifficultyLevel = LevelManager.Instance.DifficultyLevel;
+        EnemiesThisWave = SpawnManager.Instance.EnemiesThisWave();
         if( WaypointParent )
         {
             Waypoints = new List<Transform>();
@@ -56,6 +66,8 @@ public class AIManager : MonoBehaviour
     void
     Update()
     {
+        if( Paused ) return;
+
         if( !Player )
         {
             if( PlayerManager.instance ) 
@@ -70,7 +82,6 @@ public class AIManager : MonoBehaviour
         }
 
         //TODO: If there are no more seekers and there are no more waves left to spawn then show the success screen
-
 
         //NOTE: We give orders to all of the AI based on their personal information
     }
@@ -127,12 +138,23 @@ public class AIManager : MonoBehaviour
     AddSeeker( in SeekerAI Seeker )
     {
         Seekers.Add( Seeker );
+        switch( Seeker.type )
+        {
+            case EnemyType.Seeker:
+                Seeker.SetHealth( SeekerHealth[DifficultyLevel] );
+                break;
+            case EnemyType.Interceptor:
+                Seeker.SetHealth( InterceptorHealth[DifficultyLevel] );
+                break;
+        }
     }
 
     public void
     RemoveSeeker( in SeekerAI Seeker )
     {
-        Seekers.Remove( Seeker );
+        Debug.Log("Removed Seeker from AI Manager List: " + Seeker.gameObject );
+
+        if( !Seekers.Remove( Seeker ) ) return;
         for(int i = 0; i < AttackingSeekers.Length; i++ )
         {
             if( AttackingSeekers[i] == Seeker )
@@ -141,6 +163,20 @@ public class AIManager : MonoBehaviour
             }
         }
 
+        EnemiesDestroyedThisWave++;
+        EnemiesDestroyed++;
+        if( EnemiesDestroyedThisWave >= EnemiesThisWave )
+        {
+            if( SpawnManager.Instance.SpawnAllEntities() )
+            {
+                EnemiesThisWave = SpawnManager.Instance.EnemiesThisWave();
+                EnemiesDestroyedThisWave = 0;
+            }
+            else
+            {
+                LevelManager.Instance.EndLevel( false );
+            }
+        }
     }
 
     public List<SeekerAI>
@@ -190,6 +226,64 @@ public class AIManager : MonoBehaviour
     GetAttackingSeekers()
     {
         return AttackingSeekers;
+    }
+
+    public void
+    RemoveAttackSeeker( in SeekerAI AI )
+    {
+        for( int i = 0; i < AttackingSeekers.Length; i++ )
+        {
+            if( AI == AttackingSeekers[ i ] )
+            {
+                AttackingSeekers[ i ] = null;
+            }
+        }
+    }
+
+    public void
+    EndLevel()
+    {
+        SeekerAI CurrentSeeker = null;
+        for(int i = 0; i < AttackingSeekers.Length; i++ )
+        {
+            AttackingSeekers[i] = null;
+        }
+
+        while( Seekers.Count != 0 )
+        {
+            CurrentSeeker = Seekers[0];
+            Seekers.Remove( CurrentSeeker );
+            Destroy( CurrentSeeker.gameObject );
+        }
+    }
+
+    public void
+    Restart()
+    {
+        PlayerDestroyed = false ;
+        EnemiesDestroyed = 0;
+        EnemiesDestroyedThisWave = 0;
+        EnemiesThisWave = SpawnManager.Instance.EnemiesThisWave();
+    }
+
+    public void
+    Pause()
+    {
+        foreach( SeekerAI AI in Seekers )
+        {
+            AI.Pause();
+        }
+        Paused = true;
+    }
+
+    public void
+    Unpause()
+    {
+        foreach( SeekerAI AI in Seekers )
+        {
+            AI.Unpause();
+        }
+        Paused = false;
     }
 
 }

@@ -5,6 +5,7 @@ using UnityEngine;
 public class UIManager : MonoBehaviour
 {
 
+    public static UIManager Instance;
     [Header("User Input")]
     public InputHandler IH;
 
@@ -12,6 +13,21 @@ public class UIManager : MonoBehaviour
     public GameObject PauseMenu;
     public GameObject FailScreen;
     public GameObject SuccessScreen;
+    public ConsumableSlot ConsumableUI;
+
+    private void
+    Awake()
+    {
+        if( Instance == null )
+        {
+            Instance = this;
+        }
+        else if( Instance != this )
+        {
+            Destroy( this );
+        }
+        DontDestroyOnLoad( this );
+    }
 
     private void
     Start()
@@ -41,32 +57,52 @@ public class UIManager : MonoBehaviour
             }
 
         }
+
+        ConsumableUI = FindObjectOfType< ConsumableSlot >();
         if( !FailScreen || !SuccessScreen || !PauseMenu ) return false;
 
         FailScreen.SetActive( false );
         SuccessScreen.SetActive( false );
         PauseMenu.SetActive( false );
+        ConsumableUI.Deactivate();
 
         //TODO: Any other UI Element needs to be created here
         return true;
     }
 
     public void
-    ShowFailScreen()
+    ShowFailScreen( GameStatistics gameStats )
     {
         FailScreen.SetActive( true );
+        SuccessScreen.SetActive( false );
+        ConsumableUI.gameObject.SetActive( false );
+        EndScreen endScreen = FailScreen.GetComponent<EndScreen>();
+        endScreen.DisplayStats( in gameStats );
     }
 
     public void
-    ShowSuccessScreen()
+    ShowSuccessScreen( GameStatistics gameStats )
     {
         SuccessScreen.SetActive( true );
+        FailScreen.SetActive( false );
+        ConsumableUI.gameObject.SetActive( false );
+        EndScreen endScreen = SuccessScreen.GetComponent<EndScreen>();
+        endScreen.DisplayStats( in gameStats );
+    }
+
+    public void
+    Restart()
+    {
+        FailScreen.SetActive( false );
+        SuccessScreen.SetActive( false );
+        Debug.Log("UI Restart");
     }
 
     public void
     ShowPauseScreen()
     {
         PauseMenu.SetActive( true );
+        ConsumableUI.gameObject.SetActive( false );
         MenuManager menu =  PauseMenu.GetComponent< MenuManager >();
         if( !menu )
         {
@@ -80,11 +116,18 @@ public class UIManager : MonoBehaviour
     HidePauseScreen()
     {
         PauseMenu.SetActive( false );
+        ConsumableUI.gameObject.SetActive( true );
     }
 
     public void
-    UpdateEnemiesCounter()
+    ShowConsumable()
     {
+        ConsumableUI.Activate();
     }
 
+    public void
+    HideConsumable()
+    {
+        ConsumableUI.Deactivate();
+    }
 }

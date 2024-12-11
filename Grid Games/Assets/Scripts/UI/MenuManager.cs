@@ -7,6 +7,7 @@ public class MenuManager : MonoBehaviour
 {
     [Header("Menus:")]
     [SerializeField] private List<GameObject> MenuList;
+    private SceneChanger SC;
     private int CurrentSelectedMenu;
 
     public static int MainIndex = 0;
@@ -21,6 +22,7 @@ public class MenuManager : MonoBehaviour
     private void
     Start()
     {
+        SC = FindObjectOfType< SceneChanger >();
         RestartMenu();
     }
 

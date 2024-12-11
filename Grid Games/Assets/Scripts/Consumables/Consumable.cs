@@ -13,15 +13,28 @@ public enum ConsumableType
 public class Consumable : MonoBehaviour
 {
     public ConsumableType type;
+    public AudioSource Audio;
 
-    void
+    public void
+    Pause()
+    {
+        Audio.Stop();
+    }
+
+    public void
+    UnPause()
+    {
+        AudioManager.Instance.PlayConsumableAudio( in Audio );
+    }
+
+    private void
     OnTriggerEnter( Collider other )
     {
-        COGConnector collidingCycle = other.transform.GetComponent<COGConnector>();
+        PlayerCollision collidingCycle = other.transform.GetComponent< PlayerCollision >();
 
         if( collidingCycle )
         {
-            collidingCycle.PickUpConsumable( type );
+            collidingCycle.player.PickUp( type );
             DestroyConsumable();
         }
 
@@ -30,9 +43,7 @@ public class Consumable : MonoBehaviour
     private void
     DestroyConsumable()
     {
-        ConsumableManager CM = FindObjectOfType<ConsumableManager>();
-        CM.RemoveSelfFromConsumablesList( this.gameObject );
-        //Perform Any other cleanup and activate the special effects here
+        ConsumableManager.Instance.RemoveSelfFromConsumablesList( this.gameObject );
         Destroy( this.gameObject );
     }
 }

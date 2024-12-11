@@ -4,37 +4,89 @@ using UnityEngine;
 
 public class SpawnManager : MonoBehaviour
 {
-
     [HideInInspector] public Spawner[] Spawners;
 
-    [Header("Player Prefab")]
-    [SerializeField] private GameObject Player;
-
-    [Header("Enemy Prefab")]
-    [SerializeField] private GameObject Seeker;
-    [SerializeField] private GameObject Interceptor;
-
-    private int CurrentNumberOfSeekers;
-    private int CurrentNumberOfInterceptors;
+    public static SpawnManager Instance;
+    private GameObject Player;
+    private GameObject Seeker;
+    private GameObject Interceptor;
+    private GameObject SpawnSphere;
 
     private List<int> SeekerWaveNumbers;
     private List<int> InterceptorWaveNumbers;
-    private int WaveNum;
+    public int WaveNum;
+    public int TotalWaves;
+    public int TotalNumberOfEnemies;
 
-    void Start()
+    private void
+    Awake()
     {
-        WaveNum = 0;
+        if(Instance != null && Instance != this )
+        {
+            Destroy( this );
+            return;
+        }
+        else
+        {
+            Instance = this;
+        }
+        DontDestroyOnLoad( this );
     }
 
     public bool
     Initialize( in List<int> SeekersWave, in List<int> InterceptorWave)
     {
-        CurrentNumberOfSeekers = 0;
-        CurrentNumberOfInterceptors = 0;
         SeekerWaveNumbers = SeekersWave;
         InterceptorWaveNumbers = InterceptorWave;
         Spawners = FindObjectsOfType<Spawner>();
+
         if( Spawners.Length == 0 ) return false;
+
+        TotalNumberOfEnemies = 0;
+        foreach( int WaveEnemies in SeekerWaveNumbers )
+        {
+            TotalNumberOfEnemies += WaveEnemies;
+        }
+
+        foreach( int WaveEnemies in InterceptorWaveNumbers )
+        {
+            TotalNumberOfEnemies += WaveEnemies;
+        }
+
+        TotalWaves = SeekerWaveNumbers.Count;
+        WaveNum = 0;
+
+        //Loading Prefabs
+        Player = Resources.Load("Player_Cycle") as GameObject;
+        Seeker = Resources.Load("Seeker") as GameObject;
+        Interceptor = Resources.Load("Interceptor") as GameObject;
+        SpawnSphere = Resources.Load("SpawnSphere") as GameObject;
+
+        if( !Player )
+        {
+            Debug.LogError("No Player Prefab Found in Resources Folder");
+            return false;
+        }
+
+        if( !Seeker )
+        {
+            Debug.LogError("No Seeker Prefab Found in Resources Folder");
+            return false;
+        }
+
+        if( !Interceptor )
+        {
+            Debug.LogError("No Interceptor Prefab Found in Resources Folder");
+            return false;
+        }
+
+        if( !SpawnSphere )
+        {
+            Debug.LogError("No SpawnSphere Prefab Found in Resources Folder");
+            return false;
+        }
+
+
         return true;
     }
 
@@ -64,27 +116,52 @@ public class SpawnManager : MonoBehaviour
     public bool
     SpawnAllEntities()
     {
-        //TODO: Pick a random spawner instead of doing this for each
-        //TODO: Spawn wave of enemies
-        foreach( Spawner currentSpawner in Spawners )
+        if( WaveNum > TotalWaves - 1 )
+        { //NOTE: End level if we hit the last wave
+            return false;
+        }
+
+        int CurrentNumberOfSeekers = 0;
+        int CurrentNumberOfInterceptors = 0;
+        int CurrentWaveSeekers = SeekerWaveNumbers[WaveNum];
+        int CurrentWaveInterceptors = InterceptorWaveNumbers[WaveNum];
+        int totalEnemiesInWave = CurrentWaveSeekers + CurrentWaveInterceptors;
+
+
+        //NOTE: Filling temporary list
+        List< Spawner > temp = new List< Spawner >();
+        foreach( Spawner spawn in Spawners )
         {
-            if( currentSpawner.ForcePlayerSpawn ) continue;
+            temp.Add( spawn );
+        }
+
+        for( int i = 0; i < totalEnemiesInWave; i++)
+        {
+            int randomSpawner = Random.Range( 0, temp.Count - 1  );
+            Spawner currentSpawner = temp[ randomSpawner ];
+            if( currentSpawner.ForcePlayerSpawn )
+            {
+                i--;
+                continue;
+            }
 
             if( CurrentNumberOfSeekers < SeekerWaveNumbers[WaveNum] )
             {
                 SpawnEnemy( currentSpawner.transform.position, currentSpawner.StartingDirection, in Seeker );
+                Debug.Log("Spawn Seeker At: " + currentSpawner.transform.position );
                 CurrentNumberOfSeekers++;
             }
             else if( CurrentNumberOfInterceptors < InterceptorWaveNumbers[WaveNum] )
             {
                 SpawnEnemy( currentSpawner.transform.position, currentSpawner.StartingDirection, in Interceptor );
+                Debug.Log("Spawn Interceptor At: " + currentSpawner.transform.position );
                 CurrentNumberOfInterceptors++;
             }
-            else
-            {
-                break;
-            }
+
+            temp.Remove( currentSpawner );
         }
+
+        temp = null;
 
         WaveNum++;
 
@@ -94,7 +171,6 @@ public class SpawnManager : MonoBehaviour
     private void
     SpawnPlayerInstance( Vector3 Location, Directions StartingDirection )
     {
-
         GameObject PlayerInstance = Instantiate( Player );
         Transform PlayerTransform = PlayerInstance.transform;
         PlayerTransform.position = Location;
@@ -122,8 +198,11 @@ public class SpawnManager : MonoBehaviour
     {
 
         GameObject EnemyInstance = Instantiate( EnemyPrefab );
+        GameObject SpawnSphereInstance = Instantiate( SpawnSphere );
         Transform EnemyTransform = EnemyInstance.transform;
+        Transform SpawnSphereTransform = SpawnSphereInstance.transform;
         EnemyTransform.position = Location;
+        SpawnSphereTransform.position = Location;
 
         switch( StartingDirection )
         {
@@ -140,5 +219,29 @@ public class SpawnManager : MonoBehaviour
                 break;
         }
 
+    }
+
+    private void
+    CleanUpLevel()
+    {
+        //NOTE: Cleaning up Seekers that were being destroyed as the game ended
+        SeekerAI[] SeekersStillAlive = FindObjectsOfType< SeekerAI >();
+    }
+
+    public void
+    RestartLevel()
+    {
+        WaveNum = 0;
+        CleanUpLevel();
+        SpawnPlayer();
+        SpawnAllEntities();
+    }
+
+    public int
+    EnemiesThisWave()
+    {
+        int Result = SeekerWaveNumbers[ WaveNum - 1 ];
+        Result += InterceptorWaveNumbers[ WaveNum - 1 ];
+        return Result;
     }
 }

@@ -8,7 +8,9 @@ public class LaserGrid : MonoBehaviour
     private void
     OnCollisionEnter( Collision other )
     {
-        CycleBehavior player = other.gameObject.GetComponent<PlayerCollision>().player;
+        CycleBehavior player = null;
+        if( other != null ) player = other.gameObject.GetComponent<PlayerCollision>().player;
+
         if( player )
         {
             Rigidbody playerRigidbody = player.COG_Rigidbody;
@@ -26,6 +28,7 @@ public class LaserGrid : MonoBehaviour
         }
         else //The collision is against an AI
         {
+            //NOTE: Check to see if it collided with an ai or something else
         }
     }
 }

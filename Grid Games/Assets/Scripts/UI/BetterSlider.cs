@@ -11,12 +11,17 @@ public class BetterSlider : BetterUI
     private int CurrentValue;
     private float ResetTimer;
     private float CurrentTimer;
+    private bool ControllerConnected;
 
     private new void
     OnEnable()
     {
+        ControllerConnected = false;
+        InputHandler Ih = FindObjectOfType<InputHandler>();
+        ControllerConnected = Ih.ConnectedController;
         SettingsManager SM = FindObjectOfType<SettingsManager>();
         CurrentValue = SM.GetAudio( ChannelType );
+        slider.value = (float)CurrentValue / 100;
     }
 
     private new void
@@ -24,18 +29,20 @@ public class BetterSlider : BetterUI
     {
         SettingsManager SM = FindObjectOfType<SettingsManager>();
         SM.SaveAudio( ChannelType, CurrentValue );
+        MainMenuAudio MMA = FindObjectOfType<MainMenuAudio>();
+        if( MMA ) MMA.UpdateAudioSource();
     }
 
     private new void
     Start()
     {
-        //TODO: Set values to the saved values
         ResetTimer = .2f;
     }
 
     private void
     Update()
     {
+        if( !ControllerConnected ) return;
         slider.value = (float)CurrentValue / 100;
         if( CurrentTimer > 0 )
         {
@@ -101,6 +108,12 @@ public class BetterSlider : BetterUI
         }
 
         return true;
+    }
+
+    public void
+    UpdateCurrentValue()
+    {
+        CurrentValue = (int)( slider.value * 100 );
     }
 
 }

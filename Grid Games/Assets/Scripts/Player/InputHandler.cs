@@ -47,10 +47,14 @@ public class InputHandler : MonoBehaviour
         gameInput = new GameInputStates();
 
         //NOTE: Gamepad buttons
-        gameInput.buttonStates.north.buttonPressed = Input.GetKeyDown( KeyCode.Z );
+        gameInput.buttonStates.north.buttonPressed = Input.GetKeyDown( KeyCode.E );
         gameInput.buttonStates.south.buttonPressed = Input.GetKeyDown( KeyCode.Space );
+        if( !gameInput.buttonStates.south.buttonPressed )
+        {
+            gameInput.buttonStates.south.buttonPressed = Input.GetKeyDown( KeyCode.Return );
+        }
         gameInput.buttonStates.west.buttonPressed = Input.GetKeyDown( KeyCode.Q );
-        gameInput.buttonStates.east.buttonPressed = Input.GetKeyDown( KeyCode.E );
+        gameInput.buttonStates.east.buttonPressed = Input.GetKeyDown( KeyCode.F );
 
         //NOTE: Fake DPAD
         Vector2 dpad = new Vector2();
@@ -182,6 +186,7 @@ public class InputHandler : MonoBehaviour
             {
                 foreach(string controller in controllers)
                 {
+                    if( controller == "" ) continue;
                     if( !controller.Contains("Virtual") )//TODO: There has to be a better way to do this, this is very error prone
                     {
                         ConnectedController = true;

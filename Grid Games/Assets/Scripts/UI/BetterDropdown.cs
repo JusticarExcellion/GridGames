@@ -8,7 +8,8 @@ public class BetterDropdown : BetterUI
 
     [SerializeField] private UnityEvent CallingFunction;
     [SerializeField] private TMP_Dropdown dropdown;
-    private int value; // TODO: Change this so it shows the right value that's saved locally, this should ask a singleton what it's value is
+    [SerializeField] private DropdownType type;
+    private int value;
     private int StartingValue;
     private float AnalogToleranceLevel;
     private int DropdownCount;
@@ -17,22 +18,34 @@ public class BetterDropdown : BetterUI
     OnEnable()
     {
         SettingsManager SM = FindObjectOfType<SettingsManager>();
-        value = SM.GetDifficulty();
+        if( type == DropdownType.Difficulty )
+        {
+            value = SM.GetDifficulty();
+        }
+        else if( type == DropdownType.GraphicLevel )
+        {
+            value = SM.GetGraphicalLevel();
+        }
     }
 
     private new void
     OnDisable()
     {
         SettingsManager SM = FindObjectOfType<SettingsManager>();
-        SM.SaveDifficulty( value );
+        if( SM ) SM.SaveDropdown( value, type );
+        else
+        {
+            Debug.Log("NO SETTINGS MANAGER FOUND!!!");
+        }
     }
 
     private new void
     Start()
     {
-        value = 0;
         AnalogToleranceLevel = MenuControls.AnalogToleranceLevel;
         DropdownCount = dropdown.options.Count;
+        dropdown.onValueChanged.AddListener( delegate { SetValueTo( dropdown ); } );
+
     }
 
     public override void
@@ -116,6 +129,12 @@ public class BetterDropdown : BetterUI
     ChooseSelection()
     {
         dropdown.Hide();
+    }
+
+    private void
+    SetValueTo( TMP_Dropdown myDropdown )
+    {
+        value = myDropdown.value;
     }
 
 }

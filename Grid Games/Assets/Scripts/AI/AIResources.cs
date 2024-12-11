@@ -18,7 +18,7 @@ public class Kinematic //NOTE: We want to contain the current Velocity of our ch
 public enum AIState
 {
     Standby,
-    Wander,
+    Vulnerable,
     Seek,
     Chase,
     Match,
@@ -30,7 +30,7 @@ public class AIResources
 {
     //TODO: This is where we will implement all of the behaviors Seek, avoid, chase, search
 
-    public static readonly int MaxPredictionTime = 5;
+    public static readonly int MaxPredictionTime = 2;
 
     //We need to be using a common structure to pass around and feed into the Actuator part of the AI
     public static Steering
@@ -63,8 +63,10 @@ public class AIResources
     {
         Steering Result = new Steering();
         Vector3 direction = Target.Transform.position - Character.Transform.position;
+
         float distance = direction.magnitude;
         float characterSpeed = Character.Velocity.magnitude;
+        Vector3 velocity = Target.Transform.TransformDirection( Target.Velocity ); // Getting the real world velocity of the Target
         float prediction = 0.0f;
 
         if( characterSpeed <= distance / MaxPredictionTime )
@@ -78,7 +80,7 @@ public class AIResources
 
         //NOTE: Seek Behavior at the prediction target
         //TODO: This only works correctly seemingly in the -z direction does not chase properly otherwise
-        Vector3 NewSeekTarget = Target.Transform.position + (Target.Velocity * prediction);
+        Vector3 NewSeekTarget = Target.Transform.position + ( velocity * prediction );
 
         /* DEBUG:
         Debug.Log( "Prediction Time: " + prediction );
@@ -133,7 +135,17 @@ public class AIResources
     public static Steering
     Flee( in Kinematic Target, in Kinematic Character )
     {
-        //TODO: Implement Flee
+        Steering Result = new Steering();
+        Vector3 direction = Target.Transform.position - Character.Transform.position;
+        Result.Velocity = Character.Transform.position - Target.Transform.position;
+        Result.Velocity.y = 0;
+        Result.Rotation = Quaternion.LookRotation( direction );
+        return Result;
+    }
+
+    public static Steering
+    Vulnerable( in Kinematic Target, in Kinematic Character )
+    {
         Steering Result = new Steering();
         Result.Velocity = Character.Transform.forward;
         return Result;
@@ -146,6 +158,7 @@ public class AIResources
         Vector3 direction = Target.Transform.position - Character.Transform.position;
         float distance = direction.magnitude;
         float characterSpeed = Character.Velocity.magnitude;
+        Vector3 velocity = Target.Transform.TransformDirection( Target.Velocity );
         float prediction = 0.0f;
 
         if( characterSpeed <= distance / MaxPredictionTime )
@@ -158,7 +171,7 @@ public class AIResources
         }
 
         //NOTE: Seek Behavior at the prediction target
-        Vector3 NewSeekTarget = Target.Transform.position + (Target.Velocity * prediction);
+        Vector3 NewSeekTarget = Target.Transform.position + ( velocity * prediction);
         NewSeekTarget += Target.Transform.forward * AttackLookAhead;
 
         /* DEBUG:
