@@ -9,7 +9,7 @@ public class LaserGrid : MonoBehaviour
     OnCollisionEnter( Collision other )
     {
         CycleBehavior player = null;
-        if( other != null ) player = other.gameObject.GetComponent<PlayerCollision>().player;
+        if( other.gameObject != null ) player = other.gameObject.GetComponent<PlayerCollision>().player;
 
         if( player )
         {

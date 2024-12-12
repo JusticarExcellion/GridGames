@@ -3532,8 +3532,8 @@ MonoBehaviour:
   DifficultyLevel: 0
   AudioMixer: {fileID: 265429216221765675, guid: 467a6eeeacf79a148bc88a08a77def8b, type: 2}
   LevelMusic: {fileID: 8300000, guid: bad9d2f645c51434fa9fc37ba04078aa, type: 3}
-  SeekerList: 020000000200000002000000
-  InterceptorList: 000000000100000002000000
+  SeekerList: 000000000100000000000000
+  InterceptorList: 010000000100000002000000
 --- !u!4 &842177341
 Transform:
   m_ObjectHideFlags: 0

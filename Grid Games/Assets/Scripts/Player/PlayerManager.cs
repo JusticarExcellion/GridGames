@@ -41,7 +41,6 @@ public class PlayerManager : MonoBehaviour
     public void
     DestroyedPlayer()
     {
-
         PlayerDestroyed = true;
         LevelManager.Instance.EndLevel( true );
     }
